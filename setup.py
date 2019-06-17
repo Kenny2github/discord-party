@@ -28,6 +28,6 @@ setup(
     ],
     keywords='discord rpc presence party',
     py_modules=["discord_party"],
-    install_requires=['pypresence==3.3.2', 'six'],
+    install_requires=['pypresence==3.3.2'],
     python_requires='>=3.7',
 )
