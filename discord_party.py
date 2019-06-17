@@ -55,9 +55,9 @@ AioClient.register_event = register_event
 Number = Union[int, float]
 Identifier = Union[int, str]
 
-def _status_var(dtype):
+def _status_var(dtype, name=None):
     def newfunc(func):
-        levar = func.__name__
+        levar = name or func.__name__
         @property
         @wraps(func)
         def _get(self) -> Optional[dtype]:
@@ -152,12 +152,12 @@ class Party:
         """What the player is currently doing"""
         pass
 
-    @_status_var(int)
+    @_status_var(int, 'start')
     def start_time(self):
         """Epoch time for game start"""
         pass
 
-    @_status_var(int)
+    @_status_var(int, 'end')
     def end_time(self):
         """Epoch time for game end"""
         pass
@@ -245,13 +245,6 @@ class Party:
         Call ``meanwhile`` with no arguments every ``delay`` seconds
         in the meantime. Returns the party secret.
         """
-        if None in {
-                self.id,
-                self.size,
-                self.max,
-                self.join
-        }:
-            raise TypeError('id, size, max, and join must all be set')
         await self.update()
         fut = self.loop.create_future()
         @self.on_player_join
@@ -291,7 +284,8 @@ class Party:
         Calls stop_updating_loop() as well.
         """
         self.stop_updating_loop()
-        self._rpc.close()
-        self._rpc = None
+        if self._rpc is not None:
+            self._rpc.close()
+            self._rpc = None
 
     __del__ = close
